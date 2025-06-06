@@ -100,3 +100,9 @@ ingress:
     - secretName: "lldap-secret-tls"
       hosts:
         - "lldap.test.com"
+  traefik:
+    enabled: false
+    entryPoints:
+      http: ["websecure"]
+      ldaps: ["ldaps"]
+    tls: {}
