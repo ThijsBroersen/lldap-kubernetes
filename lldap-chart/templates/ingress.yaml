@@ -15,9 +15,7 @@ spec:
         - name: {{ include "lldap-chart.fullname" $ }}-service
           port: 17170
   {{- end }}
-  {{- if .Values.ingress.traefik.tls }}
   tls: {{ .Values.ingress.traefik.tls | toYaml }}
-  {{- end }}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRouteTCP
@@ -32,10 +30,9 @@ spec:
       services:
         - name: {{ include "lldap-chart.fullname" $ }}-service
           port: 3890
+          tls: true
   {{- end }}
-  {{- if .Values.ingress.traefik.tls }}
   tls: {{ .Values.ingress.traefik.tls | toYaml }}
-  {{- end }}
 {{- else }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
