@@ -1,4 +1,42 @@
 {{- if .Values.ingress.enabled }}
+{{- if .Values.ingress.traefik.enabled }}
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "lldap-chart.fullname" . }}-ingress
+  namespace: {{ .Values.namespace }}
+spec:
+  entryPoints: {{ .Values.ingress.traefik.entryPoints.http }}
+  routes:
+  {{- range .Values.ingress.hosts }}
+    - match: Host(`{{ .host }}`) && PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: {{ include "lldap-chart.fullname" $ }}-service
+          port: 17170
+  {{- end }}
+  {{- if .Values.ingress.traefik.tls }}
+  tls: {{ .Values.ingress.traefik.tls | toYaml }}
+  {{- end }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: {{ include "lldap-chart.fullname" . }}-ingress-ldap
+  namespace: {{ .Values.namespace }}
+spec:
+  entryPoints: {{ .Values.ingress.traefik.entryPoints.ldaps }}
+  routes:
+  {{- range .Values.ingress.hosts }}
+    - match: HostSNI(`{{ .host }}`)
+      services:
+        - name: {{ include "lldap-chart.fullname" $ }}-service
+          port: 3890
+  {{- end }}
+  {{- if .Values.ingress.traefik.tls }}
+  tls: {{ .Values.ingress.traefik.tls | toYaml }}
+  {{- end }}
+{{- else }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -6,10 +44,10 @@ metadata:
   namespace: {{ .Values.namespace }}
   annotations:
     {{- toYaml .Values.ingress.annotations | nindent 4 }}
-{{- if .Values.ingress.labels }}
+  {{- if .Values.ingress.labels }}
   labels:
-{{ toYaml .Values.ingress.labels | indent 4 }}
-{{- end }}
+    {{ toYaml .Values.ingress.labels | indent 4 }}
+  {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   rules:
@@ -35,4 +73,5 @@ spec:
       {{- end }}
       secretName: {{ .secretName }}
   {{- end }}
+{{- end }}
 {{- end }}

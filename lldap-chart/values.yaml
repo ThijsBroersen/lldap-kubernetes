@@ -58,7 +58,6 @@ image:
   # tag: "v0.6.1"
   pullPolicy: "IfNotPresent"
 
-
 # HPA configuration
 # make sure to use RWX storage class, if use 1 replica and not hpa
 hpa:
@@ -67,8 +66,6 @@ hpa:
   maxReplicas: 3
   targetCPUUtilizationPercentage: 60
   targetMemoryUtilizationPercentage: 60
-
-
 
 #### service this is unique service, so no enabled is added as if not it wont work
 service:
@@ -81,7 +78,6 @@ service:
     - name: "17170"
       port: 17170
       targetPort: 17170
-
 
 #####ingress
 ingress:
@@ -99,5 +95,9 @@ ingress:
     - secretName: "lldap-secret-tls"
       hosts:
         - "lldap.test.com"
-
-
+  traefik:
+    enabled: false
+    entryPoints:
+      http: ["websecure"]
+      ldaps: ["ldaps"]
+    tls: {}
